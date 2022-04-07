@@ -111,6 +111,13 @@ REST_FRAMEWORK = {
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
+DJOSER = {
+    'HIDE_USERS': False,
+    'SERIALIZERS': {
+        # 'user': 'users.serializers.CustomUserSerializer',
+        'user_create': 'users.serializers.CustomUserCreateSerializer',
+    }
+}
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
