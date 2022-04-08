@@ -1,20 +1,29 @@
-from djoser.serializers import UserCreateSerializer
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from .models import CustomUser
 
 
-class CustomUserCreateSerializer(UserCreateSerializer):
+class CustomUserSerializer(UserSerializer):
     is_subscribed = SerializerMethodField()
 
     class Meta:
         model = CustomUser
         fields = ('email', 'id', 'username', 'first_name',
-                  'last_name', 'is_subscribed', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
-
+                  'last_name', 'is_subscribed')
+    
     def get_is_subscribed(self, obj):
         return False
+
+
+class CustomUserCreateSerializer(UserCreateSerializer):
+
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'id', 'username', 'first_name',
+                  'last_name', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
+
     
     def create(self, validated_data):
         user = CustomUser(
@@ -22,6 +31,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             username=validated_data['username'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name']
+            
         )
         user.set_password(validated_data['password'])
         user.save()

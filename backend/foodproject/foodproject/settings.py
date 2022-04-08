@@ -114,8 +114,9 @@ AUTH_USER_MODEL = 'users.CustomUser'
 DJOSER = {
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        # 'user': 'users.serializers.CustomUserSerializer',
+        'user': 'users.serializers.CustomUserSerializer',
         'user_create': 'users.serializers.CustomUserCreateSerializer',
+        'current_user': 'users.serializers.CustomUserSerializer',
     }
 }
 # Internationalization
