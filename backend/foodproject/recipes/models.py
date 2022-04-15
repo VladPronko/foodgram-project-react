@@ -1,8 +1,8 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import (CASCADE, CharField, ForeignKey, ImageField,
-                              ManyToManyField, PositiveIntegerField, SlugField,
-                              TextField)
+                              IntegerField, ManyToManyField,
+                              PositiveIntegerField, SlugField, TextField)
 from users.models import CustomUser
 
 
@@ -45,6 +45,7 @@ class Recipe(models.Model):
     ingredients = ManyToManyField(
         Ingredient,
         through='IngredientsForRecipes',
+        related_name='recipes',
         verbose_name='Список ингредиентов'
         )
     tags = ManyToManyField(
@@ -64,8 +65,15 @@ class Recipe(models.Model):
 
 class IngredientsForRecipes(models.Model):
     """Модель для связи ингредиента с рецептом."""
-    ingredients = ForeignKey(Ingredient, on_delete=models.CASCADE)
-    recipe = ForeignKey(Recipe, on_delete=models.CASCADE)
+    ingredients = ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='recipe_ingredients')
+    recipe = ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='recipe_ingredients')
+    amount = IntegerField(default=1)
 
     def __str__(self):
         return f'{self.recipe} {self.ingredients}'

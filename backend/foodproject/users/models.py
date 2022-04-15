@@ -15,7 +15,7 @@ class CustomUser(AbstractUser):
         max_length=150
     )
 
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'username']
     USERNAME_FIELD = 'email'
 
     class Meta:
