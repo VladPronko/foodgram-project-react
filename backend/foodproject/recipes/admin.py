@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Ingredient, Recipe, Tag
+from .models import Ingredient, IngredientsForRecipes, Recipe, Tag
 
 
 @admin.register(Tag)
@@ -24,3 +24,9 @@ class RecipeAdmin(admin.ModelAdmin):
         'text',
         'cooking_time'
     )
+
+@admin.register(IngredientsForRecipes)
+class IngredientsForRecipesAdmin(admin.ModelAdmin):
+    """Настраиваем управление ингридиентами для рецепта через панель
+        администратора Джанго."""
+    list_display = ('id', 'ingredients', 'recipe', 'amount')

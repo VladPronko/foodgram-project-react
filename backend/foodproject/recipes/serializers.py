@@ -1,5 +1,4 @@
-from multiprocessing import managers
-
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.serializers import (ModelSerializer,
                                         PrimaryKeyRelatedField, ReadOnlyField,
@@ -10,36 +9,16 @@ from .models import Ingredient, IngredientsForRecipes, Recipe, Tag
 
 
 class TagsSerializer(ModelSerializer):
-    """Сериализатор тега."""
     class Meta:
         model = Tag
         fields = ['id', 'name', 'color', 'slug']
 
 
 class IngredientSerializer(ModelSerializer):
-    """Сериализатор ингридиентов."""
-    # name = serializers.ReadOnlyField()
-    # measurement_unit = serializers.ReadOnlyField()
-
     class Meta:
         model = Ingredient
         fields = ['id', 'name', 'measurement_unit']
 
-
-# class IngredientRecipeSerializer(ModelSerializer):
-#     id = PrimaryKeyRelatedField(
-#         queryset=Ingredient.objects.all(),
-#     )
-#     name = serializers.CharField(
-#         read_only=True,
-#     )
-#     measurement_unit = serializers.CharField(
-#         read_only=True,
-#     )
-
-#     class Meta:
-#         model = IngredientsForRecipes
-#         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 class IngredientRecipeSerializer(ModelSerializer):
     id = ReadOnlyField(source='ingredients.id')
@@ -52,22 +31,20 @@ class IngredientRecipeSerializer(ModelSerializer):
 
 
 class RecipeSerializer(ModelSerializer):
-    """Сериализатор для создания рецепта."""
     author = CustomUserSerializer(read_only=True)
     ingredients = SerializerMethodField()
-    # ingredients = IngredientRecipeSerializer(many=True, read_only=True)
+    image = Base64ImageField(max_length=None, use_url=True)
     tags = PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True
         )
-        
+
     class Meta:
         model = Recipe
         fields = [
             'id', 'tags', 'author', 'ingredients',
             'name', 'image', 'text', 'cooking_time'
         ]
-        # fields = '__all__'
 
     def get_ingredients(self, obj):
         objects = IngredientsForRecipes.objects.filter(recipe=obj)
@@ -75,18 +52,43 @@ class RecipeSerializer(ModelSerializer):
         return serializer.data
 
     def create(self, validated_data):
+        print(validated_data)
         request = self.context.get('request')
-        # ingredients = self.initial_data.get('ingredients')
-        # ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(author=request.user, **validated_data)
         recipe.tags.set(tags)
         ingredients_set = request.data['ingredients']
         for ingredient in ingredients_set:
             ingredient_model = Ingredient.objects.get(id=ingredient['id'])
-            IngredientsForRecipes.objects.create(recipe=recipe, ingredients=ingredient_model, amount=ingredient['amount'])
+            IngredientsForRecipes.objects.create(
+                recipe=recipe,
+                ingredients=ingredient_model,
+                amount=ingredient['amount']
+            )
         recipe.save()
         return recipe
+
+    def update(self, instance, validated_data):
+        tags = validated_data.pop('tags')
+        recipe = instance
+        instance.name = validated_data.get('name', instance.name)
+        instance.image = validated_data.get('image', instance.image)
+        instance.text = validated_data.get('text', instance.text)
+        instance.cooking_time = validated_data.get(
+            'cooking_time', instance.cooking_time
+            )
+        instance.save()
+        instance.tags.set(tags)
+        IngredientsForRecipes.objects.filter(recipe=instance).delete()
+        ingredients = self.initial_data.get('ingredients')
+        for ingredient in ingredients:
+            ingredient_model = Ingredient.objects.get(id=ingredient.get('id'))
+            IngredientsForRecipes.objects.create(
+                recipe=recipe,
+                ingredients=ingredient_model,
+                amount=ingredient.get('amount')
+                )
+        return instance
 
 
 class RecipeReadSerializer(RecipeSerializer):
@@ -106,7 +108,3 @@ class RecipeReadSerializer(RecipeSerializer):
             'id', 'tags', 'author', 'ingredients',
             'name', 'image', 'text', 'cooking_time'
         ]
-# class RecipeReadSerializer(RecipeSerializer):
-#     """Сериализатор для просмотра рецепта."""
-#     tags = TagsSerializer(many=True)
-    

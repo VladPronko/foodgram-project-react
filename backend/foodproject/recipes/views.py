@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 
-from .models import Ingredient, Recipe, Tag, TagRecipe
+from .models import Ingredient, Recipe, Tag
 from .serializers import (IngredientSerializer, RecipeReadSerializer,
                           RecipeSerializer, TagsSerializer)
 
