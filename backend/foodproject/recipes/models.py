@@ -85,7 +85,11 @@ class IngredientsForRecipes(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         related_name='recipe_ingredients')
-    amount = IntegerField(default=1)
+    amount = IntegerField(
+        validators=[MinValueValidator(
+            1, 'Минимальное кол-во ингрид-та - 1')],
+        verbose_name='Количество ингридиента'
+        )
 
     class Meta:
         verbose_name = 'Количество ингридиентов в рецепте'
