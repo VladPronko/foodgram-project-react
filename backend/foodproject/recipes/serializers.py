@@ -49,22 +49,55 @@ class RecipeSerializer(ModelSerializer):
     def get_ingredients(self, obj):
         objects = IngredientsForRecipes.objects.filter(recipe=obj)
         serializer = IngredientRecipeSerializer(objects, many=True)
+        # print(repr(serializer.data))
         return serializer.data
 
+    def validate(self, data):
+        if len(data['tags']) == 0:
+            raise serializers.ValidationError(
+                'Необходимо добавить минимум 1 тег')
+        if len(data['tags']) > len(set(data['tags'])):
+            raise serializers.ValidationError(
+                'Теги не должны повторяться!')
+        id_ingredients = set()
+        ingredients = self.initial_data['ingredients']
+        for ingredient in ingredients:
+            if ingredient['id'] not in id_ingredients:
+                id_ingredients.add(ingredient['id'])
+            else:
+                raise serializers.ValidationError(
+                    'Ингредиенты повторяются!'
+                )   
+        return data
+
     def create(self, validated_data):
-        print(validated_data)
         request = self.context.get('request')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(author=request.user, **validated_data)
         recipe.tags.set(tags)
         ingredients_set = request.data['ingredients']
         for ingredient in ingredients_set:
-            ingredient_model = Ingredient.objects.get(id=ingredient['id'])
-            IngredientsForRecipes.objects.create(
-                recipe=recipe,
-                ingredients=ingredient_model,
-                amount=ingredient['amount']
-            )
+            try:
+                ingredient_model = Ingredient.objects.get(id=ingredient['id'])
+                amount = ingredient['amount']
+            except KeyError:
+                raise serializers.ValidationError(
+                    'Необходимо добавить ингридиенты к рецепту!'
+                )
+            except Ingredient.DoesNotExist:
+                raise serializers.ValidationError(
+                    'Указан неверный id ингридиента!'
+                )
+            if amount:
+                IngredientsForRecipes.objects.create(
+                    recipe=recipe,
+                    ingredients=ingredient_model,
+                    amount=amount
+                )
+            else:
+                raise serializers.ValidationError(
+                    'Amount не может быть равен 0!'
+                    )
         recipe.save()
         return recipe
 
