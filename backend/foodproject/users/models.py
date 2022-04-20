@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 from django.db.models import CharField, EmailField
 
 
@@ -25,3 +26,34 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='follower',
+        verbose_name='Подписчик',
+        help_text='Подписчик на автора рецепта'
+    )
+    author = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='following',
+        verbose_name='Автор',
+        help_text='Автор рецепта'
+    )
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        constraints = [
+            models.UniqueConstraint(
+                name='unique_follow',
+                fields=['user', 'author'],
+            )
+        ]
+
+    def __str__(self):
+        return (f'Подписчик: { self.user }\n'
+                f'Автор: { self.author }')
