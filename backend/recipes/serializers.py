@@ -141,3 +141,16 @@ class RecipeReadSerializer(RecipeSerializer):
             'id', 'tags', 'author', 'ingredients',
             'name', 'image', 'text', 'cooking_time'
         ]
+
+
+class RecipeFavoriteSerializer(serializers.ModelSerializer):
+    image = Base64ImageField()
+
+    class Meta:
+        model = Recipe
+        fields = [
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        ]
