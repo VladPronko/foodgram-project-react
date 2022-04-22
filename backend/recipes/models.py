@@ -1,9 +1,14 @@
+# from django.contrib.auth import get_user_model
+from tabnanny import verbose
+
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import (CASCADE, CharField, ForeignKey, ImageField,
                               IntegerField, ManyToManyField,
                               PositiveIntegerField, SlugField, TextField)
 from users.models import CustomUser
+
+# User = get_user_model()
 
 
 class Tag(models.Model):
@@ -113,3 +118,20 @@ class TagRecipe(models.Model):
 
     def __str__(self):
         return f'{self.tags} {self.post}'
+
+
+class Favourites(models.Model):
+    user = ForeignKey(CustomUser, on_delete=CASCADE, related_name='favorites')
+    recipe = ForeignKey(Recipe, on_delete=CASCADE, related_name='favorites')
+
+    class Meta:
+        verbose_name = 'Избранное'
+        constraints = [models.UniqueConstraint(
+                fields=['recipe', 'user'],
+                name='unique_favourites'
+                )
+            ]
+
+    def __str__(self):
+        return f'Рецепт {self.recipe} в избранном у {self.user}'
+

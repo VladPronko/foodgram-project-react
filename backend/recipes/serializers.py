@@ -5,7 +5,7 @@ from rest_framework.serializers import (ModelSerializer,
                                         SerializerMethodField)
 from users.serializers import CustomUserSerializer
 
-from .models import Ingredient, IngredientsForRecipes, Recipe, Tag
+from .models import Favourites, Ingredient, IngredientsForRecipes, Recipe, Tag
 
 
 class TagsSerializer(ModelSerializer):
@@ -143,14 +143,24 @@ class RecipeReadSerializer(RecipeSerializer):
         ]
 
 
-class RecipeFavoriteSerializer(serializers.ModelSerializer):
-    image = Base64ImageField()
+class FavoriteSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(source='recipe.id')
+    name = serializers.ReadOnlyField(source='recipe.name')
+    image = serializers.ImageField(source='recipe.image', read_only=True)
+    cooking_time = serializers.ReadOnlyField(source='recipe.cooking_time')
 
     class Meta:
-        model = Recipe
-        fields = [
-            'id',
-            'name',
-            'image',
-            'cooking_time',
-        ]
+        model = Favourites
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+# class RecipeFavoriteSerializer(serializers.ModelSerializer):
+#     image = Base64ImageField()
+
+#     class Meta:
+#         model = Recipe
+#         fields = [
+#             'id',
+#             'name',
+#             'image',
+#             'cooking_time',
+#         ]
