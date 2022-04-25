@@ -38,12 +38,14 @@ class RecipeSerializer(ModelSerializer):
         queryset=Tag.objects.all(),
         many=True
         )
+    is_favorited = SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = [
             'id', 'tags', 'author', 'ingredients',
-            'name', 'image', 'text', 'cooking_time'
+            'name', 'image', 'text', 'cooking_time',
+            'is_favorited'
         ]
 
     def get_ingredients(self, obj):
@@ -51,6 +53,13 @@ class RecipeSerializer(ModelSerializer):
         serializer = IngredientRecipeSerializer(objects, many=True)
         # print(repr(serializer.data))
         return serializer.data
+
+    def get_is_favorited(self, obj):
+        user = self.get_user()
+        return (
+            user.is_authenticated
+            and user.favorites.filter(recipe=obj).exists()
+        )
 
     def validate(self, data):
         if len(data['tags']) == 0:
@@ -129,17 +138,26 @@ class RecipeReadSerializer(RecipeSerializer):
     author = CustomUserSerializer(read_only=True)
     tags = TagsSerializer(many=True)
     ingredients = SerializerMethodField()
+    is_favorited = SerializerMethodField()
 
     def get_ingredients(self, obj):
         objects = IngredientsForRecipes.objects.filter(recipe=obj)
         serializer = IngredientRecipeSerializer(objects, many=True)
         return serializer.data
 
+    def get_is_favorited(self, obj):
+        user = self.context.get('request').user
+        return (
+            user.is_authenticated
+            and user.favorites.filter(recipe=obj).exists()
+        )
+
     class Meta:
         model = Recipe
         fields = [
             'id', 'tags', 'author', 'ingredients',
-            'name', 'image', 'text', 'cooking_time'
+            'name', 'image', 'text', 'cooking_time',
+            'is_favorited'
         ]
 
 
@@ -153,14 +171,11 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favourites
         fields = ('id', 'name', 'image', 'cooking_time')
 
-# class RecipeFavoriteSerializer(serializers.ModelSerializer):
-#     image = Base64ImageField()
-
-#     class Meta:
-#         model = Recipe
-#         fields = [
-#             'id',
-#             'name',
-#             'image',
-#             'cooking_time',
-#         ]
+    # def validate(self, data):
+    #     recipe = data['recipe']
+    #     user = data['user']
+    #     if user == recipe.author:
+    #         raise serializers.ValidationError('You are the author!')
+    #     if (Favourites.objects.filter(recipe=recipe, user=user).exists()):
+    #         raise serializers.ValidationError('You have already subscribed!')
+    #     return data

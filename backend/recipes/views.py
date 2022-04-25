@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
 from users.serializers import RecipeSubscriptionSerializer
 
 from .models import Favourites, Ingredient, Recipe, Tag
@@ -31,12 +32,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
             data={'user': request.user.id, 'recipe': recipe.id}
         )
         if request.method == "POST":
+            if Favourites.objects.filter(recipe=recipe, user=request.user).exists():
+                raise ValidationError('Данный рецепт уже есть в Вашем списке избранных!')
             serializer.is_valid(raise_exception=True)
             serializer.save(user=request.user, recipe=recipe)
+            print(serializer.data)
             # serializer = ShowFollowsSerializer(author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        favorite = get_object_or_404(Favourites, user=request.user, recipe__id=id)
-        favorite.delete()
+        if request.method == "DELETE":
+            favorite = get_object_or_404(Favourites, user=request.user, recipe__id=id)
+            favorite.delete()
         return Response(
             f'Рецепт {favorite.recipe} удален из избранного у пользователя '
             f'{request.user}', status=status.HTTP_204_NO_CONTENT
