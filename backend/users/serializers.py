@@ -6,7 +6,9 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from recipes.models import Recipe
-from rest_framework import serializers
+# from requests import Response
+from rest_framework import serializers, status
+from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from .models import Follow
@@ -45,14 +47,14 @@ class ShowFollowsSerializer(CustomUserSerializer):
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count')
 
     def get_recipes(self, obj):
-        # recipes = obj.recipes.all()[:3]
-        # return RecipeSubscriptionSerializer(recipes, many=True).data
-        return True
+        recipes = obj.recipes.all()[:3]
+        return RecipeSubscriptionSerializer(recipes, many=True).data
+        # return True
 
     def get_recipes_count(self, obj):
-        # queryset = Recipe.objects.filter(author=obj)
-        # return queryset.count()
-        return True
+        queryset = Recipe.objects.filter(author=obj)
+        return queryset.count()
+        # return True
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -71,10 +73,14 @@ class FollowSerializer(serializers.ModelSerializer):
         ).exists()
         if user == author:
             raise serializers.ValidationError(
-                {"errors": 'Вы не можете подписаться на самого себя'}
+                {"errors": 'Вы не можете подписаться на самого себя!'}
             )
         elif follow_exist:
-            raise serializers.ValidationError({"errors": 'Вы уже подписаны'})
+            # return Response(
+            #     data={'errors': 'Вы уже подписаны на этого автора!'},
+            #     status=status.HTTP_400_BAD_REQUEST
+            # )
+            raise serializers.ValidationError({"errors": 'Вы уже подписаны на этого автора!'})
         return data
 
     def create(self, validated_data):
