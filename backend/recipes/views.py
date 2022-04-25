@@ -1,9 +1,10 @@
+from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
-from users.serializers import RecipeSubscriptionSerializer
 
 from .models import Favourites, Ingredient, Recipe, Shopping_cart, Tag
 from .serializers import (FavoriteSerializer, IngredientSerializer,
@@ -69,6 +70,35 @@ class RecipeViewSet(viewsets.ModelViewSet):
             f'Рецепт {shopping_cart.recipe} удален из списка покупок у пользователя '
             f'{shopping_cart.user}', status=status.HTTP_204_NO_CONTENT
         )
+
+    @action(detail=False, permission_classes=[permissions.IsAuthenticated])
+    def download_shopping_cart(self, request, pk=None):
+        shopping_cart = Shopping_cart.objects.filter(user=request.user).all()
+        shopping_list = {}
+        for item in shopping_cart:
+            for recipe_ingredient in item.recipe.recipe_ingredients.all():
+                name = recipe_ingredient.ingredients.name
+                measuring_unit = recipe_ingredient.ingredients.measurement_unit
+                amount = recipe_ingredient.amount
+                if name not in shopping_list:
+                    shopping_list[name] = {
+                        'name': name,
+                        'measurement_unit': measuring_unit,
+                        'amount': amount
+                    }
+                else:
+                    shopping_list[name]['amount'] += amount
+        content = (
+            [f'{item["name"]} ({item["measurement_unit"]}) '
+            f'- {item["amount"]}\n'
+            for item in shopping_list.values()]
+        )
+        filename = 'shopping_list.txt'
+        response = HttpResponse(content, content_type='text/plain')
+        response['Content-Disposition'] = (
+            'attachment; filename={0}'.format(filename)
+        )
+        return response
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
