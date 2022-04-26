@@ -1,4 +1,5 @@
 from drf_extra_fields.fields import Base64ImageField
+from requests import Response
 from rest_framework import serializers
 from rest_framework.serializers import (ModelSerializer,
                                         PrimaryKeyRelatedField, ReadOnlyField,
@@ -67,7 +68,7 @@ class RecipeSerializer(ModelSerializer):
             else:
                 raise serializers.ValidationError(
                     'Ингредиенты повторяются!'
-                )   
+                )
         return data
 
     def create(self, validated_data):
@@ -110,8 +111,8 @@ class RecipeSerializer(ModelSerializer):
         instance.cooking_time = validated_data.get(
             'cooking_time', instance.cooking_time
             )
-        instance.save()
         instance.tags.set(tags)
+        instance.save()
         IngredientsForRecipes.objects.filter(recipe=instance).delete()
         ingredients = self.initial_data.get('ingredients')
         for ingredient in ingredients:
@@ -122,6 +123,35 @@ class RecipeSerializer(ModelSerializer):
                 amount=ingredient.get('amount')
                 )
         return instance
+
+        # ingredients_data = validated_data.pop('ingredients')
+        # tags_data = validated_data.pop('tags')
+        # recipe = Recipe.objects.filter(id=instance.id)
+        # recipe.update(**validated_data)
+        # ingredients_instance = [
+        #     ingredient for ingredient in instance.ingredients.all()
+        # ]
+        # for item in ingredients_data:
+        #     amount = item['amount']
+        #     ingredient_id = item['id']
+        #     if IngredientForRecipe.objects.filter(
+        #             id=ingredient_id, amount=amount
+        #     ).exists():
+        #         ingredients_instance.remove(
+        #             IngredientForRecipe.objects.get(id=ingredient_id,
+        #                                             amount=amount
+        #                                             ).ingredient)
+        #     else:
+        #         IngredientForRecipe.objects.get_or_create(
+        #             recipe=instance,
+        #             ingredient=get_object_or_404(Ingredient, id=ingredient_id),
+        #             amount=amount
+        #         )
+        # if validated_data.get('image') is not None:
+        #     instance.image = validated_data.get('image', instance.image)
+        # instance.ingredients.remove(*ingredients_instance)
+        # instance.tags.set(tags_data)
+        # return instance
 
 
 class RecipeReadSerializer(RecipeSerializer):

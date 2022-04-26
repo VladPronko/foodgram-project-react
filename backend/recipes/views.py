@@ -3,10 +3,13 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
 from .models import Favourites, Ingredient, Recipe, Shopping_cart, Tag
+from .permissions import IsAdminOrOwner
 from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeReadSerializer, RecipeSerializer,
                           ShoppingCartSerializer, TagsSerializer)
@@ -15,6 +18,7 @@ from .serializers import (FavoriteSerializer, IngredientSerializer,
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdminOrOwner)
 
     def get_serializer_class(self):
         """
@@ -104,6 +108,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagsSerializer
+    permission_classes = (AllowAny,)
 
 
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
