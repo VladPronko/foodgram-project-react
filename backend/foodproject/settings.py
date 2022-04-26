@@ -110,6 +110,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'foodproject.pagination.LimitPageNumberPagination',
+    'PAGE_SIZE': 6,
     'SEARCH_PARAM': 'name'
 }
 
@@ -117,11 +118,15 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 DJOSER = {
     'HIDE_USERS': False,
-    'SERIALIZERS': {
-        'user': 'users.serializers.CustomUserSerializer',
-        'user_create': 'users.serializers.CustomUserCreateSerializer',
-        'current_user': 'users.serializers.CustomUserSerializer',
-    }
+    'PERMISSIONS': {
+        'user_list': ('rest_framework.permissions.IsAuthenticated',),
+        'user': ('rest_framework.permissions.AllowAny',),
+    },
+    # 'SERIALIZERS': {
+    #     'user': 'users.serializers.CustomUserSerializer',
+    #     'user_create': 'users.serializers.CustomUserSerializer',
+    #     'current_user': 'users.serializers.CustomUserSerializer',
+    # }
 }
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/

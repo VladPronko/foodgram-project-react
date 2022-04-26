@@ -6,6 +6,7 @@ from djoser.views import UserViewSet
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Follow
@@ -18,6 +19,22 @@ User = get_user_model()
 class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_permissions(self):
+        # print(self.action)
+        if self.action == 'create' or self.action == 'retrieve':
+            return (AllowAny(),)
+        return super().get_permissions()
+
+    # @action(methods=('POST',), detail=False)
+    # def set_password(self, request):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.request.user.set_password(
+    #         serializer.validated_data['new_password'])
+    #     self.request.user.save()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False,
             methods=["GET"],
@@ -49,4 +66,3 @@ class CustomUserViewSet(UserViewSet):
         follow.delete()
         return Response(f'{request.user} отписался от {follow.author}',
                         status=status.HTTP_204_NO_CONTENT)
-
