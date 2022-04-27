@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.contrib.admin import ModelAdmin, display
+from django.contrib.admin import display
 
-from .models import Favourites, Ingredient, IngredientsForRecipes, Recipe, Tag
+from .models import Ingredient, IngredientsForRecipes, Recipe, Tag
 
 
 @admin.register(Tag)
@@ -27,7 +27,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'author',
         'text',
         'added_to_favorites'
-        
+
     )
     list_filter = ('name', 'author', 'tags')
     read_only_fields = ('added_to_favorites',)
@@ -39,6 +39,4 @@ class RecipeAdmin(admin.ModelAdmin):
 
 @admin.register(IngredientsForRecipes)
 class IngredientsForRecipesAdmin(admin.ModelAdmin):
-    """Настраиваем управление ингридиентами для рецепта через панель
-        администратора Джанго."""
     list_display = ('id', 'ingredients', 'recipe', 'amount')

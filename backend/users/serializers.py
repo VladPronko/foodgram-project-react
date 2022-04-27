@@ -1,23 +1,16 @@
-from dataclasses import field
-from email.mime import image
-
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from djoser.serializers import UserCreateSerializer, UserSerializer
 from recipes.models import Recipe
-# from requests import Response
-from rest_framework import serializers, status
-from rest_framework.response import Response
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import (IntegerField, ModelSerializer,
+                                        SerializerMethodField, ValidationError)
 
 from .models import Follow
 
 User = get_user_model()
 
 
-class CustomUserSerializer(serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField()
+class CustomUserSerializer(ModelSerializer):
+    is_subscribed = SerializerMethodField()
 
     class Meta:
         model = User
@@ -31,15 +24,15 @@ class CustomUserSerializer(serializers.ModelSerializer):
         return Follow.objects.filter(user=request.user, author=obj).exists()
 
 
-class RecipeSubscriptionSerializer(serializers.ModelSerializer):
+class RecipeSubscriptionSerializer(ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class ShowFollowsSerializer(CustomUserSerializer):
-    recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
+    recipes = SerializerMethodField()
+    recipes_count = SerializerMethodField()
 
     class Meta:
         model = User
@@ -49,21 +42,19 @@ class ShowFollowsSerializer(CustomUserSerializer):
     def get_recipes(self, obj):
         recipes = obj.recipes.all()[:3]
         return RecipeSubscriptionSerializer(recipes, many=True).data
-        # return True
 
     def get_recipes_count(self, obj):
         queryset = Recipe.objects.filter(author=obj)
         return queryset.count()
-        # return True
 
 
-class FollowSerializer(serializers.ModelSerializer):
-    user = serializers.IntegerField(source='user.id')
-    author = serializers.IntegerField(source='author.id')
+class FollowSerializer(ModelSerializer):
+    user = IntegerField(source='user.id')
+    author = IntegerField(source='author.id')
 
     class Meta:
         model = Follow
-        fields = ['user', 'author']
+        fields = ('user', 'author')
 
     def validate(self, data):
         user = data['user']['id']
@@ -72,15 +63,11 @@ class FollowSerializer(serializers.ModelSerializer):
             user=user, author__id=author
         ).exists()
         if user == author:
-            raise serializers.ValidationError(
-                {"errors": 'Вы не можете подписаться на самого себя!'}
+            raise ValidationError(
+                'Вы не можете подписаться на самого себя!'
             )
         elif follow_exist:
-            # return Response(
-            #     data={'errors': 'Вы уже подписаны на этого автора!'},
-            #     status=status.HTTP_400_BAD_REQUEST
-            # )
-            raise serializers.ValidationError({"errors": 'Вы уже подписаны на этого автора!'})
+            raise ValidationError('Вы уже подписаны на этого автора!')
         return data
 
     def create(self, validated_data):

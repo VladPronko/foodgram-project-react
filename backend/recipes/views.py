@@ -24,57 +24,64 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdminOrOwner)
 
     def get_serializer_class(self):
-        """
-        Данный метод нужен, так как при создании
-        и просмотре рецепта необходимы разные поля (сериализаторы).
-        """
         if self.request.method in ['GET']:
             return RecipeReadSerializer
         return RecipeSerializer
 
-    @action(detail=False, methods=["POST", "DELETE"], url_path=r'(?P<id>\d+)/favorite',
-            permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=["POST", "DELETE"],
+            url_path=r'(?P<id>\d+)/favorite',
+            permission_classes=[IsAuthenticated]
+            )
     def favorite(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
         serializer = FavoriteSerializer(
             data={'user': request.user.id, 'recipe': recipe.id}
         )
         if request.method == "POST":
-            if Favourites.objects.filter(recipe=recipe, user=request.user).exists():
-                raise ValidationError('Данный рецепт уже есть в Вашем списке избранных!')
+            if Favourites.objects.filter(
+                    recipe=recipe, user=request.user).exists():
+                raise ValidationError(
+                    'Данный рецепт уже есть в Вашем списке избранных!'
+                )
             serializer.is_valid(raise_exception=True)
             serializer.save(user=request.user, recipe=recipe)
-            # print(serializer.data)
-            # serializer = ShowFollowsSerializer(author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE":
-            favorite = get_object_or_404(Favourites, user=request.user, recipe__id=id)
+            favorite = get_object_or_404(
+                Favourites, user=request.user, recipe__id=id
+            )
             favorite.delete()
         return Response(
             f'Рецепт {favorite.recipe} удален из избранного у пользователя '
             f'{request.user}', status=status.HTTP_204_NO_CONTENT
         )
 
-    @action(detail=False, methods=["POST", "DELETE"], url_path=r'(?P<id>\d+)/shopping_cart',
-            permission_classes=[permissions.IsAuthenticated])
+    @action(detail=False, methods=["POST", "DELETE"],
+            url_path=r'(?P<id>\d+)/shopping_cart',
+            permission_classes=[permissions.IsAuthenticated]
+            )
     def shopping_cart(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
         serializer = ShoppingCartSerializer(
             data={'user': request.user.id, 'recipe': recipe.id}
         )
         if request.method == "POST":
-            if Shopping_cart.objects.filter(recipe=recipe, user=request.user).exists():
-                raise ValidationError('Вы уже добавили данный рецепт в список покупок!')
+            if Shopping_cart.objects.filter(
+                    recipe=recipe, user=request.user).exists():
+                raise ValidationError(
+                    'Вы уже добавили данный рецепт в список покупок!'
+                )
             serializer.is_valid(raise_exception=True)
             serializer.save(user=request.user, recipe=recipe)
-            # print(serializer.data)
-            # serializer = ShowFollowsSerializer(author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE":
-            shopping_cart = get_object_or_404(Shopping_cart, user=request.user, recipe__id=id)
+            shopping_cart = get_object_or_404(
+                Shopping_cart, user=request.user, recipe__id=id
+            )
             shopping_cart.delete()
         return Response(
-            f'Рецепт {shopping_cart.recipe} удален из списка покупок у пользователя '
+            f'Рецепт {shopping_cart.recipe} '
+            'удален из списка покупок у пользователя '
             f'{shopping_cart.user}', status=status.HTTP_204_NO_CONTENT
         )
 
@@ -97,8 +104,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     shopping_list[name]['amount'] += amount
         content = (
             [f'{item["name"]} ({item["measurement_unit"]}) '
-            f'- {item["amount"]}\n'
-            for item in shopping_list.values()]
+                f'- {item["amount"]}\n'
+                for item in shopping_list.values()]
         )
         filename = 'shopping_list.txt'
         response = HttpResponse(content, content_type='text/plain')

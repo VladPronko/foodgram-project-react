@@ -1,9 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from django.utils.translation import gettext_lazy as _
-# from django_filters import rest_framework as filters
 from djoser.views import UserViewSet
-from rest_framework import permissions, status, viewsets
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -22,26 +20,15 @@ class CustomUserViewSet(UserViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_permissions(self):
-        # print(self.action)
         if self.action == 'create' or self.action == 'retrieve':
             return (AllowAny(),)
         return super().get_permissions()
-
-    # @action(methods=('POST',), detail=False)
-    # def set_password(self, request):
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.request.user.set_password(
-    #         serializer.validated_data['new_password'])
-    #     self.request.user.save()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False,
             methods=["GET"],
             permission_classes=[permissions.IsAuthenticated])
     def subscriptions(self, request):
         user_obj = User.objects.filter(following__user=request.user)
-        # user_obj = User.objects.filter(user=request.user)
         paginator = PageNumberPagination()
         paginator.page_size = 6
         result_page = paginator.paginate_queryset(user_obj, request)
