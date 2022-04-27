@@ -118,7 +118,7 @@ class TagRecipe(models.Model):
         verbose_name = 'Связь тегов с рецептамиы'
 
     def __str__(self):
-        return f'{self.tags} {self.post}'
+        return f'{self.tags} {self.recipe}'
 
 
 class Favourites(models.Model):

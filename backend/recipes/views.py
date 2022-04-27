@@ -1,6 +1,6 @@
-from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
@@ -8,6 +8,7 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
+from .filters import RecipeFilter
 from .models import Favourites, Ingredient, Recipe, Shopping_cart, Tag
 from .permissions import IsAdminOrOwner
 from .serializers import (FavoriteSerializer, IngredientSerializer,
@@ -16,6 +17,8 @@ from .serializers import (FavoriteSerializer, IngredientSerializer,
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RecipeFilter
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdminOrOwner)
@@ -30,7 +33,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return RecipeSerializer
 
     @action(detail=False, methods=["POST", "DELETE"], url_path=r'(?P<id>\d+)/favorite',
-            permission_classes=[permissions.IsAuthenticated])
+            permission_classes=[IsAuthenticated])
     def favorite(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
         serializer = FavoriteSerializer(
