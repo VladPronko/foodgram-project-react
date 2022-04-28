@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
 from .filters import RecipeFilter
-from .models import Favourites, Ingredient, Recipe, Shopping_cart, Tag
+from .models import Favourites, Ingredient, Recipe, ShoppingCart, Tag
 from .permissions import IsAdminOrOwner
 from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeReadSerializer, RecipeSerializer,
@@ -28,7 +28,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeReadSerializer
         return RecipeSerializer
 
-    @action(detail=False, methods=["POST", "DELETE"],
+    @action(detail=False, methods=['POST', 'DELETE'],
             url_path=r'(?P<id>\d+)/favorite',
             permission_classes=[IsAuthenticated]
             )
@@ -37,7 +37,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = FavoriteSerializer(
             data={'user': request.user.id, 'recipe': recipe.id}
         )
-        if request.method == "POST":
+        if request.method == 'POST':
             if Favourites.objects.filter(
                     recipe=recipe, user=request.user).exists():
                 raise ValidationError(
@@ -46,7 +46,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save(user=request.user, recipe=recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == "DELETE":
+        if request.method == 'DELETE':
             favorite = get_object_or_404(
                 Favourites, user=request.user, recipe__id=id
             )
@@ -56,7 +56,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             f'{request.user}', status=status.HTTP_204_NO_CONTENT
         )
 
-    @action(detail=False, methods=["POST", "DELETE"],
+    @action(detail=False, methods=['POST', 'DELETE'],
             url_path=r'(?P<id>\d+)/shopping_cart',
             permission_classes=[permissions.IsAuthenticated]
             )
@@ -65,8 +65,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = ShoppingCartSerializer(
             data={'user': request.user.id, 'recipe': recipe.id}
         )
-        if request.method == "POST":
-            if Shopping_cart.objects.filter(
+        if request.method == 'POST':
+            if ShoppingCart.objects.filter(
                     recipe=recipe, user=request.user).exists():
                 raise ValidationError(
                     'Вы уже добавили данный рецепт в список покупок!'
@@ -74,9 +74,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save(user=request.user, recipe=recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == "DELETE":
+        if request.method == 'DELETE':
             shopping_cart = get_object_or_404(
-                Shopping_cart, user=request.user, recipe__id=id
+                ShoppingCart, user=request.user, recipe__id=id
             )
             shopping_cart.delete()
         return Response(
@@ -87,7 +87,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request, pk=None):
-        shopping_cart = Shopping_cart.objects.filter(user=request.user).all()
+        shopping_cart = ShoppingCart.objects.filter(user=request.user).all()
         shopping_list = {}
         for item in shopping_cart:
             for recipe_ingredient in item.recipe.recipe_ingredients.all():

@@ -3,10 +3,11 @@ from rest_framework import serializers
 from rest_framework.serializers import (ModelSerializer,
                                         PrimaryKeyRelatedField, ReadOnlyField,
                                         SerializerMethodField)
+
 from users.serializers import CustomUserSerializer
 
 from .models import (Favourites, Ingredient, IngredientsForRecipes, Recipe,
-                     Shopping_cart, Tag)
+                     ShoppingCart, Tag)
 
 
 class TagsSerializer(ModelSerializer):
@@ -177,5 +178,5 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     cooking_time = serializers.ReadOnlyField(source='recipe.cooking_time')
 
     class Meta:
-        model = Shopping_cart
+        model = ShoppingCart
         fields = ('id', 'name', 'image', 'cooking_time')

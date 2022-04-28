@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from recipes.models import Recipe
 from rest_framework.serializers import (IntegerField, ModelSerializer,
                                         SerializerMethodField, ValidationError)
+
+from recipes.models import Recipe
 
 from .models import Follow
 
@@ -32,7 +33,7 @@ class RecipeSubscriptionSerializer(ModelSerializer):
 
 class ShowFollowsSerializer(CustomUserSerializer):
     recipes = SerializerMethodField()
-    recipes_count = SerializerMethodField()
+    recipes_count = IntegerField(source='recipes.count')
 
     class Meta:
         model = User
@@ -40,12 +41,8 @@ class ShowFollowsSerializer(CustomUserSerializer):
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count')
 
     def get_recipes(self, obj):
-        recipes = obj.recipes.all()[:3]
+        recipes = obj.recipes.all()
         return RecipeSubscriptionSerializer(recipes, many=True).data
-
-    def get_recipes_count(self, obj):
-        queryset = Recipe.objects.filter(author=obj)
-        return queryset.count()
 
 
 class FollowSerializer(ModelSerializer):
@@ -66,7 +63,7 @@ class FollowSerializer(ModelSerializer):
             raise ValidationError(
                 'Вы не можете подписаться на самого себя!'
             )
-        elif follow_exist:
+        if follow_exist:
             raise ValidationError('Вы уже подписаны на этого автора!')
         return data
 

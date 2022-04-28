@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import (CASCADE, CharField, ForeignKey, ImageField,
                               IntegerField, ManyToManyField,
                               PositiveIntegerField, SlugField, TextField)
+
 from users.models import CustomUser
 
 
@@ -118,12 +119,15 @@ class Favourites(models.Model):
 
     class Meta:
         verbose_name = 'Избранное'
+        constraints = [models.UniqueConstraint(
+            fields=['user', 'recipe'], name='unique_favourites')
+        ]
 
     def __str__(self):
         return f'Рецепт {self.recipe} в избранном у {self.user}'
 
 
-class Shopping_cart(models.Model):
+class ShoppingCart(models.Model):
     user = ForeignKey(
         CustomUser,
         on_delete=CASCADE,
@@ -136,6 +140,9 @@ class Shopping_cart(models.Model):
 
     class Meta:
         verbose_name = 'Список покупок'
+        constraints = [models.UniqueConstraint(
+            fields=['user', 'recipe'], name='unique_shopping_cart')
+        ]
 
     def __str__(self):
         return f'Рецепт {self.recipe} в списке покупок у {self.user}'

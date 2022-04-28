@@ -25,7 +25,7 @@ class CustomUserViewSet(UserViewSet):
         return super().get_permissions()
 
     @action(detail=False,
-            methods=["GET"],
+            methods=['GET'],
             permission_classes=[permissions.IsAuthenticated])
     def subscriptions(self, request):
         user_obj = User.objects.filter(following__user=request.user)
@@ -37,14 +37,14 @@ class CustomUserViewSet(UserViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     @action(detail=True,
-            methods=["POST", "DELETE"],
+            methods=['POST', 'DELETE'],
             permission_classes=[permissions.IsAuthenticated])
     def subscribe(self, request, id):
         author = get_object_or_404(User, id=id)
         serializer = FollowSerializer(
             data={'user': request.user.id, 'author': id}
         )
-        if request.method == "POST":
+        if request.method == 'POST':
             serializer.is_valid(raise_exception=True)
             serializer.save(user=request.user)
             serializer = ShowFollowsSerializer(author)
