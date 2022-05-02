@@ -31,9 +31,10 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = ('name', 'author', 'tags')
     read_only_fields = ('added_to_favorites',)
 
-    @admin.display(description='Общее число добавлений в избранное')
     def added_to_favorites(self, obj):
         return obj.favorites.count()
+
+    added_to_favorites.short_description = 'Всего добавлений в избранное'
 
 
 @admin.register(IngredientsForRecipes)
