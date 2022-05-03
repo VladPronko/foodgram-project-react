@@ -89,7 +89,7 @@ class RecipeSerializer(ModelSerializer):
                 raise serializers.ValidationError(
                     'Указан неверный id ингридиента!'
                 )
-            if amount:
+            if amount and int(amount) > 0:
                 IngredientsForRecipes.objects.create(
                     recipe=recipe,
                     ingredients=ingredient_model,
@@ -97,7 +97,7 @@ class RecipeSerializer(ModelSerializer):
                 )
             else:
                 raise serializers.ValidationError(
-                    'Amount не может быть равен 0!'
+                    'Amount должен быть больше 0!'
                 )
         recipe.save()
         return recipe
