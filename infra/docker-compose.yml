@@ -28,6 +28,8 @@ services:
     image: vladpronko/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
+    depends_on:
+      - db
 
   nginx:
     image: nginx:1.19.3
