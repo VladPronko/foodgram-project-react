@@ -54,7 +54,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
-          stack_file_name: docker-compose.yml
           script: |
             sudo docker pull vladpronko/foodgram_backend:latest
             sudo docker-compose stop
