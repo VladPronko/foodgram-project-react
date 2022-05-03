@@ -1,4 +1,4 @@
-Django==2.2.27
+Django==3.2.6
 django-filter==21.1
 djangorestframework==3.13.1
 djoser==2.1.0

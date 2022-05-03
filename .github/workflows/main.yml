@@ -17,8 +17,7 @@ jobs:
       run: | 
         python -m pip install --upgrade pip 
         pip install flake8 pep8-naming flake8-broken-line flake8-return flake8-isort
-        cd backend/
-        pip install -r requirements.txt 
+        pip install -r backend/requirements.txt 
     - name: Test with flake8 and django tests
       run: |
         python -m flake8
@@ -42,13 +41,7 @@ jobs:
           with:
             context: ./backend
             push: true
-            tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
-        - name: Push to Docker Hub
-          uses: docker/build-push-action@v2
-          with:
-            push: true
-            context: ./frontend/
-            tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
+            tags: vladpronko/foodgram_backend:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -63,14 +56,12 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           stack_file_name: docker-compose.yml
           script: |
-            cd infra
-            echo ${{ secrets.DOCKER_PASSWORD }} | sudo docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
+            sudo docker pull vladpronko/foodgram_backend:latest
             sudo docker-compose stop
             sudo docker-compose rm backend
             touch .env
-            echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
+            echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
+            echo HOST=${{ secrets.HOST }} >> .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
             echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
@@ -78,18 +69,6 @@ jobs:
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
             sudo docker-compose up -d
-            sudo docker-compose exec -T backend python manage.py makemigrations recipes
-            sudo docker-compose exec -T backend python manage.py makemigrations users
-            sudo docker-compose exec -T backend python manage.py migrate --noinput
-            sudo docker-compose exec -T backend python manage.py collectstatic --no-input
-
-#            sudo docker-compose stop
-#            sudo docker-compose rm backend
-#            touch .env
-#            sudo docker-compose up -d
-#            sudo docker-compose exec -T backend python manage.py makemigrations
-#            sudo docker-compose exec -T backend python manage.py migrate --noinput
-#            sudo docker-compose exec -T backend python manage.py collectstatic --no-input
 
   send_message:
     runs-on: ubuntu-latest
