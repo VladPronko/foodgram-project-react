@@ -110,6 +110,7 @@ DJOSER = {
     },
 }
 
+
 LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'Europe/Moscow'
