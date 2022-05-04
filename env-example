@@ -1,0 +1,7 @@
+SECRET_KEY=hhyp%u#!(2@g8anhfka8iyoq0j7e6)zoi8jo_*y9o$ad0*@)
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+DB_HOST=db
+DB_PORT=5432
