@@ -132,4 +132,5 @@ dmypy.json
 
 backend_media/
 .env
-.DS_Store
+
+.DS_Store.DS_Store
