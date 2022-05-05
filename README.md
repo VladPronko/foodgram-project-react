@@ -25,15 +25,13 @@ git clone https://github.com/VladPronko/foodgram-project-react.git
 cd infra
 ```
 - Создайте файл `.env` командой `touch .env` и добавьте в него переменные окружения для работы с базой данных:
-
+(><a href='https://github.com/VladPronko/foodgram-project-react/blob/master/env-example'>Пример файла .env</a>)
 ```
 DB_NAME=postgres # имя базы данных
 POSTGRES_USER=postgres # логин для подключения к базе данных
 POSTGRES_PASSWORD=postgres # пароль для подключения к БД (установите свой)
 DB_HOST=db # название сервиса (контейнера)
 DB_PORT=5432 # порт для подключения к БД
-
-><a href='https://github.com/VladPronko/foodgram-project-react/blob/master/env-example'>Пример файла .env</a>
 ```
 Вы можете сгенерировать ```DJANGO_SECRET_KEY``` следующим образом. 
 Из директории проекта _/backend/_ выполнить:
