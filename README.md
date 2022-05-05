@@ -30,6 +30,7 @@ cd infra
 ```
 - Создайте файл `.env` командой `touch .env` и добавьте в него переменные окружения для работы с базой данных:
 ```bash
+DJANGO_SECRET_KEY=<ваш_django_секретный_ключ>
 DB_NAME=postgres # имя базы данных
 POSTGRES_USER=postgres # логин для подключения к базе данных
 POSTGRES_PASSWORD=postgres # пароль для подключения к БД (установите свой)
@@ -45,6 +46,8 @@ from django.core.management.utils import get_random_secret_key
 get_random_secret_key()
 
 ```
+Полученный ключ скопировать в ```.env```.
+
 - Скопируйте файлы `docker-compose.yml`, `nginx.conf` и `.env` из папки `/infra/` на Ваш виртуальный сервер:
 ```bash
 scp <название файла> <username>@<server_ip>:/home/<username>/
