@@ -66,7 +66,7 @@ sudo apt install docker-compose
 - Теперь можно развернуть проект с помощью Docker используя контейнеризацию:
 
 ```bash
-sudo docker-compose up -d —build
+sudo docker-compose up -d --build
 
 ``` 
 
