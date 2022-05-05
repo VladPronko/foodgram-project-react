@@ -32,9 +32,6 @@ POSTGRES_USER=postgres # логин для подключения к базе д
 POSTGRES_PASSWORD=postgres # пароль для подключения к БД (установите свой)
 DB_HOST=db # название сервиса (контейнера)
 DB_POR
-```bash
-python3 -m venv venv
-source venv\bin\activate
 ```
 Вы можете сгенерировать ```DJANGO_SECRET_KEY``` следующим образом. 
 Из директории проекта _/backend/_ выполнить:
