@@ -69,6 +69,10 @@ class RecipeSerializer(ModelSerializer):
                 raise serializers.ValidationError(
                     'Ингредиенты повторяются!'
                 )
+            if int(ingredient['amount']) <= 0:
+                raise serializers.ValidationError(
+                    'Amount должен быть больше 0!'
+                )
         return data
 
     def create(self, validated_data):
@@ -81,6 +85,11 @@ class RecipeSerializer(ModelSerializer):
             try:
                 ingredient_model = Ingredient.objects.get(id=ingredient['id'])
                 amount = ingredient['amount']
+                IngredientsForRecipes.objects.create(
+                    recipe=recipe,
+                    ingredients=ingredient_model,
+                    amount=amount
+                )
             except KeyError:
                 raise serializers.ValidationError(
                     'Необходимо добавить ингридиенты к рецепту!'
@@ -89,17 +98,6 @@ class RecipeSerializer(ModelSerializer):
                 raise serializers.ValidationError(
                     'Указан неверный id ингридиента!'
                 )
-            if amount and int(amount) > 0:
-                IngredientsForRecipes.objects.create(
-                    recipe=recipe,
-                    ingredients=ingredient_model,
-                    amount=amount
-                )
-            else:
-                raise serializers.ValidationError(
-                    'Amount должен быть больше 0!'
-                )
-        recipe.save()
         return recipe
 
     def update(self, instance, validated_data):
