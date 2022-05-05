@@ -30,7 +30,7 @@ cd infra
 ```
 - Создайте файл `.env` командой `touch .env` и добавьте в него переменные окружения для работы с базой данных:
 ```bash
-DJANGO_SECRET_KEY=<ваш_django_секретный_ключ>
+SECRET_KEY=<ваш_django_секретный_ключ>
 DB_NAME=postgres # имя базы данных
 POSTGRES_USER=postgres # логин для подключения к базе данных
 POSTGRES_PASSWORD=postgres # пароль для подключения к БД (установите свой)
