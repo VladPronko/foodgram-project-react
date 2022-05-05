@@ -45,9 +45,9 @@ python manage.py shell
 from django.core.management.utils import get_random_secret_key  
 get_random_secret_key()
 
-```
-Полученный ключ скопировать в ```.env```.
+Полученный ключ скопировать в файл .env.
 
+```
 - Скопируйте файлы `docker-compose.yml`, `nginx.conf` и `.env` из папки `/infra/` на Ваш виртуальный сервер:
 ```bash
 scp <название файла> <username>@<server_ip>:/home/<username>/
